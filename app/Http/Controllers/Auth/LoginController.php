@@ -41,37 +41,27 @@ class LoginController extends Controller
     }
 
     public function login(Request $request)
-    {
-        try{
-            $response = Http::post(env('APP_API_URL').'/api/v1/users/login', [
-                'email' => $request->input('email'),
-                'password' => $request->input('password')
-            ]);
+    {        
+        $response = Http::post(env('APP_API_URL').'/api/v1/users/login', [
+            'email' => $request->input('email'),
+            'password' => $request->input('password')
+        ]);
 
-            $responseBody = json_decode($response->body());
-            \Log::debug($response->body());
+        $responseBody = json_decode($response->body());
 
-            if($response->successful()){
-                \Cache::put('token', $responseBody->token, now()->addHours(24));
-                return redirect(route('home'));
-            }
-
-            if($response->failed()){
-                switch($response->status()){
-                    case 401:
-                        return redirect()->back()->withInput()->withError(__('auth.'.$responseBody->error));
-                    case 403:
-                        return redirect()->back()->withInput()->withError('Forbidden');
-                    case 404:
-                        return redirect()->back()->withInput()->withError('Service Not Found');
-                    case 422:
-                        return redirect()->back()->withInput()->withErrors($responseBody->errors);
-                }
-            }
-        }catch(\Exception $e){
-            report($e);
-            return redirect()->back()->withInput()->withError(__('auth.invalid_credentials'));
+        if($response->successful()){
+            \Cache::put('token', $responseBody->token, now()->addHours(24));
+            return redirect(route('home'));
         }
-        
+
+        if($response->failed()){
+            return $this->returnFailedResponse($response->status(), $responseBody);
+        }
+    }
+
+    public function logout(Request $request)
+    {
+        \Cache::forget('token');
+        return redirect(route('login'));
     }
 }

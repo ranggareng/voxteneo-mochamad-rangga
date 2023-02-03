@@ -64,4 +64,19 @@ class LoginTest extends TestCase
             'password',
         ]);
     }
+
+     /**
+     * A basic feature test example.
+     *
+     * @return void
+     */
+    public function test_validation_invalid_credentials()
+    {
+        $response = $this->from('/login')->post('/login', [
+            'email' => $this->faker->email,
+            'password' => 'Secret123!'
+        ]);
+
+        $response->assertRedirect('/login');
+    }
 }

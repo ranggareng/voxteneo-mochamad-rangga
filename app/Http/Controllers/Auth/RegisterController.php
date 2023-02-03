@@ -40,7 +40,7 @@ class RegisterController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('guest');
+        $this->middleware('custom.guest_token');
     }
 
     public function register(Request $request)
@@ -60,16 +60,7 @@ class RegisterController extends Controller
         }
 
         if($response->failed()){
-            switch($response->status()){
-                case 401:
-                    return redirect()->back()->withInput()->withError('Unauthorized');
-                case 403:
-                    return redirect()->back()->withInput()->withError('Forbidden');
-                case 404:
-                    return redirect()->back()->withInput()->withError('Service Not Found');
-                case 422:
-                    return redirect()->back()->withInput()->withErrors($responseBody->errors);
-            }
+            return $this->returnFailedResponse($response->status(), $responseBody);
         }
     }
 }
