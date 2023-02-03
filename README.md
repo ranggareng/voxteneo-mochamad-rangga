@@ -1,4 +1,4 @@
-# Canvas Image Creator
+# API Consumer APP
 Tech Stack : Laravel 8.*
 
 ## Description
